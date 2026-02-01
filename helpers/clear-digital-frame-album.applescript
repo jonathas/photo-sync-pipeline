@@ -1,9 +1,15 @@
-tell application "Photos"
-  set targetAlbumName to "Digital frame"
+on run argv
+  if (count of argv) is 0 then
+    error "Missing album name"
+  end if
+  set targetAlbumName to item 1 of argv
+
+  tell application "Photos"
   set targetAlbum to album targetAlbumName
   set albumItems to every media item of targetAlbum
 
   repeat with p in albumItems
     remove p from targetAlbum
   end repeat
-end tell
+  end tell
+end run

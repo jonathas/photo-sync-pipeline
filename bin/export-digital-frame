@@ -85,7 +85,11 @@ echo "▶ Cleaning local DigitalFrame folder (JPG only)"
 rm -f "$DEST"/*.jpg "$DEST"/*.jpeg 2>/dev/null || true
 
 echo "▶ Clearing Photos album: $ALBUM"
-osascript "$CLEAR_ALBUM_SCRIPT"
+if ! osascript "$CLEAR_ALBUM_SCRIPT" "$DIGITAL_FRAME_ALBUM"; then
+  echo "❌ Failed to clear Photos album: $DIGITAL_FRAME_ALBUM"
+  echo "   Verify the album exists in Photos."
+  exit 1
+fi
 
 echo "▶ Running backups"
 "$SYNC_EXTERNAL_CMD" && "$SYNC_BACKUP_CMD"

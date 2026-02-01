@@ -97,7 +97,7 @@ Backups are treated as a responsibility.
 
 ## Configuration
 
-1. Edit tbe `config.sh` file in the repository root.
+1. Edit the `config.sh` file in the repository root.
 2. Install the required dependencies: `make deps`
 3. Run this to install the symlinks: `make install`
 

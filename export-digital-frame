@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# === LOCAL CONFIG ===
+DEST="$HOME/Pictures/DigitalFrame"
+
+# === ANDROID CONFIG ===
+ANDROID_IP="192.168.0.217"     # change if IP changes
+ANDROID_PORT="40821"
+ANDROID_DEST="/sdcard/Pictures"
+
+mkdir -p "$DEST"
+
+echo "▶ Cleaning local DigitalFrame folder"
+rm -f "$DEST"/*.jpg "$DEST"/*.jpeg 2>/dev/null || true
+rm -f "$DEST"/.osxphotos_export.db 2>/dev/null || true
+
+echo "▶ Exporting Photos album: Digital frame"
+osxphotos export "$DEST" \
+  --album "Digital frame" \
+  --only-photos \
+  --skip-edited \
+  --skip-live \
+  --filename "{created.strftime,%Y-%m-%d %H.%M.%S.%f}"
+
+echo "▶ Lowercasing extensions"
+python3 "$HOME/bin/lowercase_extensions.py" "$DEST"
+
+echo "▶ Resizing/compressing existing JPG/JPEG (max 2000px, quality 75)"
+while IFS= read -r -d '' f; do
+  tmp="${f%.*}.__tmp__.jpg"
+  sips -Z 2000 -s format jpeg -s formatOptions 75 "$f" --out "$tmp" >/dev/null
+  mv "$tmp" "${f%.*}.jpg"
+
+  ext="${f##*.}"
+  ext_lc="$(printf "%s" "$ext" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$ext_lc" != "jpg" ]]; then
+    rm -f "$f"
+  fi
+done < <(find "$DEST" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) -print0)
+
+echo "▶ Converting HEIC to JPG (max 2000px, quality 75) without overwriting existing JPGs"
+while IFS= read -r -d '' f; do
+  out="${f%.*}.jpg"
+  if [[ -e "$out" ]]; then
+    echo "  Skipping (JPG already exists): $(basename "$out")"
+    continue
+  fi
+  sips -Z 2000 -s format jpeg -s formatOptions 75 "$f" --out "$out" >/dev/null
+done < <(find "$DEST" -maxdepth 1 -type f -iname "*.heic" -print0)
+
+echo "▶ Removing source HEIC files"
+find "$DEST" -maxdepth 1 -type f -iname "*.heic" -delete
+
+# === ADB TRANSFER ===
+echo "▶ Connecting to Android tablet via ADB (Wi-Fi)"
+adb connect "${ANDROID_IP}:${ANDROID_PORT}" >/dev/null
+
+#echo "▶ Ensuring destination exists on tablet: ${ANDROID_DEST}"
+#adb shell mkdir -p "${ANDROID_DEST}"
+
+shopt -s nullglob
+files=( "$DEST"/*.jpg "$DEST"/*.jpeg )
+if (( ${#files[@]} == 0 )); then
+  echo "⚠️  No JPG/JPEG files found to send. Nothing to do."
+  exit 0
+fi
+
+echo "▶ Files to be transferred (${#files[@]}):"
+for f in "${files[@]}"; do
+  echo "   • $(basename "$f")"
+done
+
+echo "▶ Sending photos to tablet"
+adb push "${files[@]}" "${ANDROID_DEST}/"
+
+#echo "▶ Verifying files on tablet"
+#adb shell ls -lh "${ANDROID_DEST}" | head
+
+echo "▶ Triggering MediaStore scan (so Google Photos can see new files)"
+adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1 || true
+
+echo "▶ Cleaning local DigitalFrame folder"
+rm -f "$DEST"/*
+
+echo "✅ Digital frame export + ADB transfer complete"

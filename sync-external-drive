@@ -1,0 +1,15 @@
+#!/bin/bash
+
+baseDir=~/Library/CloudStorage/Dropbox
+externalDriveDir=/Volumes/Expansion
+
+declare -a localDirs=("Backup" "Documents" "EstelaJon" "Photos" "Videos")
+
+for dir in "${localDirs[@]}"
+do
+   echo "======================= Synchronizing ${dir} ======================="
+   rsync -Prauv --exclude ".DS_Store" $baseDir/$dir/ $externalDriveDir/$dir
+done
+
+date > $externalDriveDir/last_sync.txt
+echo "======================= Done Synchronizing! ======================="

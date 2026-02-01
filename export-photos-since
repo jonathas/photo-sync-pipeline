@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Usage:
+#   export-photos-since YYYY-MM-DD /destination/dir
+#
+# Example:
+#   export-photos-since 2026-01-25 "$HOME/Pictures/CameraUploads"
+
+START_DATE="${1:-}"
+DEST="${2:-}"
+
+if [[ -z "$START_DATE" || -z "$DEST" ]]; then
+  echo "Usage: $0 YYYY-MM-DD /destination/dir"
+  exit 1
+fi
+
+if ! [[ "$START_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+  echo "Invalid date format. Use YYYY-MM-DD"
+  exit 1
+fi
+
+mkdir -p "$DEST"
+
+echo "▶ Exporting photos & videos since $START_DATE → $DEST"
+
+osxphotos export "$DEST" \
+  --from-date "$START_DATE" \
+  --skip-live \
+  --skip-edited \
+  --update \
+  --directory "{created.year}/{created.mm} - {created.month}/{created.strftime,%Y-%m-%d}" \
+  --filename "{created.strftime,%Y-%m-%d %H.%M.%S.%f}"
+
+echo "▶ Lowercasing file extensions"
+
+python3 "$HOME/bin/lowercase_extensions.py" "$DEST"
+
+echo "✅ Done."

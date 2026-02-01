@@ -83,6 +83,7 @@ Backups are treated as a responsibility.
 ### macOS
 
 - Apple **Photos** app
+- Photos app set to download originals (not "Optimize Mac Storage")
 - `osxphotos` CLI
 
 ### Android
@@ -99,6 +100,21 @@ Backups are treated as a responsibility.
 1. Edit the `config.sh` file in the repository root.
 2. Install the required dependencies: `make deps`
 3. Run this to install the symlinks: `make install`
+
+---
+
+## Photos organization (Weekly flow)
+
+Here's what I do weekly for backing up my photos as physical files and also sending them to the Digital frame:
+
+- Check for duplicates using the duplicates tool in the Photos app and delete them
+- Let iCloud resync (open the Photos app on Macbook and check the sync status)
+- Run the export photos script with the date after I last ran the sync: `export-photos-since 2026-01-25`
+- Move physical files to the correct directories for backup
+- Remove photos from the Photos app, leaving only the ones I choose from each group of photos
+- Select which photos in the Photos app will go to the Digital frame, by adding them to the Digital frame album in the Photos app
+- Remember to connect the backup hard-drives to the Macbook
+- Finish the process by running the script: `export-digital-frame`
 
 ---
 

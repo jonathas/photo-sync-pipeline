@@ -3,7 +3,7 @@ import os
 import pathlib
 import uuid
 
-root = pathlib.Path.home() / "Pictures" / "CameraUploads"
+root = pathlib.Path.home() / "Pictures" / "Camera Uploads"
 
 def same_file(a: pathlib.Path, b: pathlib.Path) -> bool:
     try:

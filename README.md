@@ -11,6 +11,32 @@ A small, repo-contained pipeline to manage photos outside iCloud:
 
 This is a pragmatic, repeatable workflow built around **ownership of your photo files**.
 
+## A replacement for Dropbox “Camera Uploads”
+
+This pipeline also works well as a replacement for Dropbox’s **Camera Uploads** feature.
+
+If you are migrating away from Dropbox (for example, to Proton Drive), one of the most commonly missed features is:
+
+> Automatic, local-first access to camera photos as real files.
+
+Apple Photos already provides the capture and sync layer, but it does not expose photos as files in a predictable way, and many alternative cloud drives do not offer an equivalent to Camera Uploads.
+
+This project fills that gap by:
+
+- Exporting photos from Apple Photos into real directories on disk
+- Using deterministic filenames and paths
+- Making the filesystem the long-term source of truth
+- Keeping cloud storage optional, not required
+
+The result is functionally similar to Camera Uploads, but with:
+
+- Explicit control
+- Better backups
+- No dependency on a single vendor
+
+Apple Photos remains the capture and curation interface.  
+The filesystem replaces Dropbox as the archive.
+
 ## Why this project exists
 
 Modern photo workflows are fragmented by design.

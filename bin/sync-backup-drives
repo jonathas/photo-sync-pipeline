@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-rsync -avh --progress --delete --exclude '._*'  --exclude '.DS_Store'  --exclude '.fseventsd' --exclude '.Trashes' --exclude '.Spotlight-V100' /Volumes/Expansion/ /Volumes/WD\ Elements/
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/../config.sh"
+
+[[ -f "$CONFIG_FILE" ]] || { echo "❌ Missing config file: $CONFIG_FILE"; exit 1; }
+source "$CONFIG_FILE"
+
+rsync -avh --progress --delete \
+  --exclude '._*' \
+  --exclude '.DS_Store' \
+  --exclude '.fseventsd' \
+  --exclude '.Trashes' \
+  --exclude '.Spotlight-V100' \
+  "$SYNC_BACKUP_SOURCE/" "$SYNC_BACKUP_DEST/"

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: lowercase-extensions <path>"
+  exit 1
+fi
+
+ROOT="$1"
+if [[ ! -e "$ROOT" ]]; then
+  echo "Error: path does not exist: $ROOT"
+  exit 1
+fi
+if [[ ! -d "$ROOT" ]]; then
+  echo "Error: path is not a directory: $ROOT"
+  exit 1
+fi
+
+count=0
+while IFS= read -r -d '' p; do
+  base="$(basename "$p")"
+  [[ "$base" != *.* ]] && continue
+
+  ext="${base##*.}"
+  ext_lc="$(printf "%s" "$ext" | tr '[:upper:]' '[:lower:]')"
+  [[ "$ext" == "$ext_lc" ]] && continue
+
+  target="${p%.*}.${ext_lc}"
+
+  if [[ -e "$target" && ! "$p" -ef "$target" ]]; then
+    echo "SKIP (different file exists): $target"
+    continue
+  fi
+
+  tmp="${p%.*}.__tmpcase__${RANDOM}${RANDOM}"
+  mv "$p" "$tmp"
+  mv "$tmp" "$target"
+  echo "RENAMED: $base -> $(basename "$target")"
+  count=$((count + 1))
+done < <(find "$ROOT" -type f -print0)
+
+echo "DONE. Renamed: $count"

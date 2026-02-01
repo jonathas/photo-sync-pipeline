@@ -17,9 +17,16 @@ ANDROID_DEST="/sdcard/Pictures"
 FOTOO_PKG="com.bo.fotoo"
 
 # === TOOLS ===
-LOWERCASE_SCRIPT="$SCRIPT_DIR/helpers/lowercase_extensions.py"
+LOWERCASE_SCRIPT="$SCRIPT_DIR/helpers/lowercase-extensions"
 CLEAR_ALBUM_SCRIPT="$SCRIPT_DIR/helpers/clear-digital-frame-album.applescript"
 
 # === BACKUPS ===
 SYNC_EXTERNAL_CMD="$SCRIPT_DIR/bin/sync-external-drive"
 SYNC_BACKUP_CMD="$SCRIPT_DIR/bin/sync-backup-drives"
+
+# === SYNC PATHS ===
+SYNC_BASE_DIR="$HOME/Library/CloudStorage/Dropbox"
+SYNC_EXTERNAL_DRIVE_DIR="/Volumes/Expansion"
+SYNC_BACKUP_SOURCE="/Volumes/Expansion"
+SYNC_BACKUP_DEST="/Volumes/WD Elements"
+SYNC_LOCAL_DIRS=("Backup" "Documents" "EstelaJon" "Photos" "Videos")

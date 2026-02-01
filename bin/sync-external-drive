@@ -1,16 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-baseDir=~/Library/CloudStorage/Dropbox
-externalDriveDir=/Volumes/Expansion
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/../config.sh"
 
-declare -a localDirs=("Backup" "Documents" "EstelaJon" "Photos" "Videos")
+[[ -f "$CONFIG_FILE" ]] || { echo "❌ Missing config file: $CONFIG_FILE"; exit 1; }
+source "$CONFIG_FILE"
 
-for dir in "${localDirs[@]}"
+for dir in "${SYNC_LOCAL_DIRS[@]}"
 do
    echo "======================= Synchronizing ${dir} ======================="
-   rsync -Prauv --exclude ".DS_Store" $baseDir/$dir/ $externalDriveDir/$dir
+   rsync -Prauv --exclude ".DS_Store" "$SYNC_BASE_DIR/$dir/" "$SYNC_EXTERNAL_DRIVE_DIR/$dir"
 done
 
-date > $externalDriveDir/last_sync.txt
+date > "$SYNC_EXTERNAL_DRIVE_DIR/last_sync.txt"
 echo "======================= Done Synchronizing! ======================="

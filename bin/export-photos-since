@@ -39,6 +39,6 @@ osxphotos export "$DEST" \
   --filename "{created.strftime,%Y-%m-%d %H.%M.%S.%f}"
 
 echo "▶ Lowercasing file extensions"
-python3 "$LOWERCASE_SCRIPT" "$DEST"
+"$LOWERCASE_SCRIPT" "$DEST"
 
 echo "✅ export-photos-since complete"

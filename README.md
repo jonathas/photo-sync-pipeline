@@ -84,7 +84,6 @@ Backups are treated as a responsibility.
 
 - Apple **Photos** app
 - `osxphotos` CLI
-- `python3`
 
 ### Android
 

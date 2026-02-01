@@ -22,11 +22,6 @@ deps:
 		exit 1; \
 	}
 
-	@command -v python3 >/dev/null || { \
-		echo "▶ Installing python3"; \
-		brew install python; \
-	}
-
 	@command -v adb >/dev/null || { \
 		echo "▶ Installing adb"; \
 		brew install android-platform-tools; \
@@ -56,10 +51,6 @@ doctor:
 	@command -v adb >/dev/null \
 		&& echo "✅ adb" \
 		|| echo "❌ adb missing"
-
-	@command -v python3 >/dev/null \
-		&& echo "✅ python3" \
-		|| echo "❌ python3 missing"
 
 	@command -v sips >/dev/null \
 		&& echo "✅ sips" \

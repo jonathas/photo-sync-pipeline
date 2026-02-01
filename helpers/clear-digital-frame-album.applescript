@@ -5,6 +5,9 @@ on run argv
   set targetAlbumName to item 1 of argv
 
   tell application "Photos"
+  if not (exists album targetAlbumName) then
+    error "Album not found: " & targetAlbumName
+  end if
   set targetAlbum to album targetAlbumName
   set albumItems to every media item of targetAlbum
 

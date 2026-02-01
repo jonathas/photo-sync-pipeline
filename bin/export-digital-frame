@@ -25,7 +25,7 @@ osxphotos export "$DEST" \
   --filename "{created.strftime,%Y-%m-%d %H.%M.%S.%f}"
 
 echo "▶ Lowercasing extensions"
-python3 "$LOWERCASE_SCRIPT" "$DEST"
+"$LOWERCASE_SCRIPT" "$DEST"
 
 echo "▶ Resizing/compressing existing JPG/JPEG (max 2000px, quality 75)"
 while IFS= read -r -d '' f; do

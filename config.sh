@@ -14,8 +14,9 @@ ANDROID_DEST="/sdcard/Pictures"
 FOTOO_PKG="com.bo.fotoo"
 
 # === TOOLS ===
-LOWERCASE_SCRIPT="$HOME/bin/lowercase_extensions.py"
+LOWERCASE_SCRIPT="$SCRIPT_DIR/helpers/lowercase_extensions.py"
+CLEAR_ALBUM_SCRIPT="$SCRIPT_DIR/helpers/clear-digital-frame-album.applescript"
 
 # === BACKUPS ===
-SYNC_EXTERNAL_CMD="sync-external-drive"
-SYNC_BACKUP_CMD="sync-backup-drives"
+SYNC_EXTERNAL_CMD="$SCRIPT_DIR/bin/sync-external-drive"
+SYNC_BACKUP_CMD="$SCRIPT_DIR/bin/sync-backup-drives"

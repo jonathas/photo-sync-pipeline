@@ -2,24 +2,30 @@
 set -euo pipefail
 
 # Usage:
-#   export-photos-since YYYY-MM-DD /destination/dir
+#   export-photos-since YYYY-MM-DD
 #
 # Example:
-#   export-photos-since 2026-01-25 "$HOME/Pictures/CameraUploads"
+#   export-photos-since 2026-01-25
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/../photo-workflow.env"
+
+[[ -f "$ENV_FILE" ]] || { echo "❌ Missing env file: $ENV_FILE"; exit 1; }
+source "$ENV_FILE"
 
 START_DATE="${1:-}"
-DEST="${2:-}"
 
-if [[ -z "$START_DATE" || -z "$DEST" ]]; then
-  echo "Usage: $0 YYYY-MM-DD /destination/dir"
+if [[ -z "$START_DATE" ]]; then
+  echo "Usage: $0 YYYY-MM-DD"
   exit 1
 fi
 
 if ! [[ "$START_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
-  echo "Invalid date format. Use YYYY-MM-DD"
+  echo "❌ Invalid date format. Use YYYY-MM-DD"
   exit 1
 fi
 
+DEST="$CAMERA_UPLOADS_DIR"
 mkdir -p "$DEST"
 
 echo "▶ Exporting photos & videos since $START_DATE → $DEST"
@@ -33,7 +39,6 @@ osxphotos export "$DEST" \
   --filename "{created.strftime,%Y-%m-%d %H.%M.%S.%f}"
 
 echo "▶ Lowercasing file extensions"
+python3 "$LOWERCASE_SCRIPT" "$DEST"
 
-python3 "$HOME/bin/lowercase_extensions.py" "$DEST"
-
-echo "✅ Done."
+echo "✅ export-photos-since complete"

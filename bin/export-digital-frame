@@ -1,30 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === LOCAL CONFIG ===
-DEST="$HOME/Pictures/DigitalFrame"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/../photo-workflow.env"
 
-# === ANDROID CONFIG ===
-ANDROID_IP="192.168.0.217"     # change if IP changes
-ANDROID_PORT="40821"
-ANDROID_DEST="/sdcard/Pictures"
+[[ -f "$ENV_FILE" ]] || { echo "❌ Missing env file: $ENV_FILE"; exit 1; }
+source "$ENV_FILE"
+
+DEST="$DIGITAL_FRAME_DIR"
+ALBUM="$DIGITAL_FRAME_ALBUM"
 
 mkdir -p "$DEST"
 
-echo "▶ Cleaning local DigitalFrame folder"
+echo "▶ Cleaning local DigitalFrame folder (JPG only)"
 rm -f "$DEST"/*.jpg "$DEST"/*.jpeg 2>/dev/null || true
 rm -f "$DEST"/.osxphotos_export.db 2>/dev/null || true
 
-echo "▶ Exporting Photos album: Digital frame"
+echo "▶ Exporting Photos album: $ALBUM"
 osxphotos export "$DEST" \
-  --album "Digital frame" \
+  --album "$ALBUM" \
   --only-photos \
   --skip-edited \
   --skip-live \
   --filename "{created.strftime,%Y-%m-%d %H.%M.%S.%f}"
 
 echo "▶ Lowercasing extensions"
-python3 "$HOME/bin/lowercase_extensions.py" "$DEST"
+python3 "$LOWERCASE_SCRIPT" "$DEST"
 
 echo "▶ Resizing/compressing existing JPG/JPEG (max 2000px, quality 75)"
 while IFS= read -r -d '' f; do
@@ -34,18 +35,13 @@ while IFS= read -r -d '' f; do
 
   ext="${f##*.}"
   ext_lc="$(printf "%s" "$ext" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$ext_lc" != "jpg" ]]; then
-    rm -f "$f"
-  fi
+  [[ "$ext_lc" != "jpg" ]] && rm -f "$f"
 done < <(find "$DEST" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) -print0)
 
-echo "▶ Converting HEIC to JPG (max 2000px, quality 75) without overwriting existing JPGs"
+echo "▶ Converting HEIC → JPG (no overwrite)"
 while IFS= read -r -d '' f; do
   out="${f%.*}.jpg"
-  if [[ -e "$out" ]]; then
-    echo "  Skipping (JPG already exists): $(basename "$out")"
-    continue
-  fi
+  [[ -e "$out" ]] && continue
   sips -Z 2000 -s format jpeg -s formatOptions 75 "$f" --out "$out" >/dev/null
 done < <(find "$DEST" -maxdepth 1 -type f -iname "*.heic" -print0)
 
@@ -54,15 +50,15 @@ find "$DEST" -maxdepth 1 -type f -iname "*.heic" -delete
 
 # === ADB TRANSFER ===
 echo "▶ Connecting to Android tablet via ADB (Wi-Fi)"
-adb connect "${ANDROID_IP}:${ANDROID_PORT}" >/dev/null
-
-#echo "▶ Ensuring destination exists on tablet: ${ANDROID_DEST}"
-#adb shell mkdir -p "${ANDROID_DEST}"
+if ! adb connect "${ANDROID_IP}:${ANDROID_PORT}" >/dev/null; then
+  echo "❌ ADB connect failed. Check Wireless debugging on tablet."
+  exit 1
+fi
 
 shopt -s nullglob
 files=( "$DEST"/*.jpg "$DEST"/*.jpeg )
 if (( ${#files[@]} == 0 )); then
-  echo "⚠️  No JPG/JPEG files found to send. Nothing to do."
+  echo "⚠️  No JPG/JPEG files found to send"
   exit 0
 fi
 
@@ -74,13 +70,25 @@ done
 echo "▶ Sending photos to tablet"
 adb push "${files[@]}" "${ANDROID_DEST}/"
 
-#echo "▶ Verifying files on tablet"
-#adb shell ls -lh "${ANDROID_DEST}" | head
+echo "▶ Triggering MediaStore scan"
+adb shell content call \
+  --method scan_volume \
+  --uri content://media \
+  --arg external_primary \
+  >/dev/null 2>&1 || true
 
-echo "▶ Triggering MediaStore scan (so Google Photos can see new files)"
-adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1 || true
+echo "▶ Restarting Fotoo"
+adb shell am force-stop "$FOTOO_PKG" >/dev/null 2>&1 || true
+adb shell monkey -p "$FOTOO_PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
 
-echo "▶ Cleaning local DigitalFrame folder"
-rm -f "$DEST"/*
+echo "▶ Cleaning local DigitalFrame folder (JPG only)"
+rm -f "$DEST"/*.jpg "$DEST"/*.jpeg 2>/dev/null || true
 
-echo "✅ Digital frame export + ADB transfer complete"
+echo "▶ Clearing Photos album: $ALBUM"
+osascript "$CLEAR_ALBUM_SCRIPT"
+
+echo "▶ Running backups"
+"$SYNC_EXTERNAL_CMD"
+"$SYNC_BACKUP_CMD"
+
+echo "✅ export-digital-frame complete"

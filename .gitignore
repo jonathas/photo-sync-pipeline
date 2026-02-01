@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# temp files
+*.tmp
+*.__tmp__.jpg
+
+# osxphotos db
+.osxphotos_export.db

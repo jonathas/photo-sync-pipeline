@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 rsync -avh --progress --delete --exclude '._*'  --exclude '.DS_Store'  --exclude '.fseventsd' --exclude '.Trashes' --exclude '.Spotlight-V100' /Volumes/Expansion/ /Volumes/WD\ Elements/

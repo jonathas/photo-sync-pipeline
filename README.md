@@ -1,5 +1,7 @@
 # photo-sync-pipeline
 
+![photo-sync-pipeline](image.png)
+
 A small, repo-contained pipeline to manage photos outside iCloud:
 
 - Export photos and videos from **Apple Photos** to a local folder for long-term archival

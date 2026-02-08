@@ -125,9 +125,11 @@ Backups are treated as a responsibility.
 
 ## Configuration
 
-1. Edit the `config.sh` file in the repository root.
-2. Install the required dependencies: `make deps`
-3. Run this to install the symlinks: `make install`
+1. Install the required dependencies: `make deps`
+2. Run this to install the symlinks and create config: `make install`
+3. Edit the config at `~/.photo-sync-pipeline/config.sh`
+
+Note: if you run scripts directly from the repo, they will fall back to `./config.sh` in the repo root.
 
 ---
 

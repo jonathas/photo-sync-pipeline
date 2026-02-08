@@ -1,6 +1,8 @@
 SHELL := /usr/bin/env bash
 BIN_DIR := $(CURDIR)/bin
 TARGET_BIN := $(HOME)/.local/bin
+CONFIG_DIR := $(HOME)/.photo-sync-pipeline
+CONFIG_FILE := $(CONFIG_DIR)/config.sh
 
 .PHONY: help digital-frame export-since backups install uninstall deps doctor
 
@@ -74,6 +76,14 @@ install:
 		ln -sf "$$f" "$(TARGET_BIN)/$$name"; \
 	done
 	@echo "✅ Commands installed"
+
+	@mkdir -p "$(CONFIG_DIR)"
+	@if [[ ! -f "$(CONFIG_FILE)" ]]; then \
+		cp "$(CURDIR)/config.sh" "$(CONFIG_FILE)"; \
+		echo "✅ Created config at $(CONFIG_FILE)"; \
+	else \
+		echo "✅ Config already exists at $(CONFIG_FILE)"; \
+	fi
 
 	@if ! echo "$$PATH" | tr ':' '\n' | grep -qx "$(TARGET_BIN)"; then \
 		echo ""; \

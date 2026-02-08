@@ -8,11 +8,7 @@ on run argv
   if not (exists album targetAlbumName) then
     error "Album not found: " & targetAlbumName
   end if
-  set targetAlbum to album targetAlbumName
-  set albumItems to every media item of targetAlbum
-
-  repeat with p in albumItems
-    remove p from targetAlbum
-  end repeat
+  delete album targetAlbumName
+  make new album named targetAlbumName
   end tell
 end run

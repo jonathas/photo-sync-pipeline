@@ -119,3 +119,6 @@ export-since:
 backups:
 	@./bin/sync-external-drive
 	@./bin/sync-backup-drives
+
+clear-album:
+	@bash -c 'source "$(CONFIG_FILE)"; osascript "$$CLEAR_ALBUM_SCRIPT" "$$DIGITAL_FRAME_ALBUM"'

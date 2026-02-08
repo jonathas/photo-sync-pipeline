@@ -1,6 +1,6 @@
 # === LOCAL PATHS ===
-# Allow callers to override; otherwise derive from this file's location.
-: "${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+# Always derive from this file's location so helper paths stay stable.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 DIGITAL_FRAME_DIR="$HOME/Pictures/Digital Frame"
 CAMERA_UPLOADS_DIR="$HOME/Pictures/Camera Uploads"

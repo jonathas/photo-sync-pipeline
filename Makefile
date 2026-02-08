@@ -84,6 +84,9 @@ install:
 	else \
 		echo "✅ Config already exists at $(CONFIG_FILE)"; \
 	fi
+	@mkdir -p "$(CONFIG_DIR)/helpers"
+	@cp -f "$(CURDIR)/helpers/"* "$(CONFIG_DIR)/helpers/"
+	@echo "✅ Installed helpers to $(CONFIG_DIR)/helpers"
 
 	@if ! echo "$$PATH" | tr ':' '\n' | grep -qx "$(TARGET_BIN)"; then \
 		echo ""; \
@@ -103,6 +106,7 @@ uninstall:
 		name=$$(basename $$f); \
 		rm -f "$(TARGET_BIN)/$$name"; \
 	done
+	@rm -rf "$(CONFIG_DIR)"
 	@echo "✅ Symlinks removed"
 
 digital-frame:

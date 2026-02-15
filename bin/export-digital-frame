@@ -21,6 +21,19 @@ source "$CONFIG_FILE"
 DEST="$DIGITAL_FRAME_DIR"
 ALBUM="$DIGITAL_FRAME_ALBUM"
 
+echo "▶ Preflight: checking ADB connection"
+if ! adb connect "${ANDROID_IP}:${ANDROID_PORT}" >/dev/null 2>&1; then
+  echo "❌ ADB connect failed for ${ANDROID_IP}:${ANDROID_PORT}."
+  echo "   Fix Wireless debugging on the tablet, then re-run."
+  exit 1
+fi
+
+if ! adb -s "${ANDROID_IP}:${ANDROID_PORT}" get-state >/dev/null 2>&1; then
+  echo "❌ ADB device is not ready (${ANDROID_IP}:${ANDROID_PORT})."
+  echo "   Fix the connection first, then re-run."
+  exit 1
+fi
+
 mkdir -p "$DEST"
 
 echo "▶ Cleaning local DigitalFrame folder (JPG only)"
@@ -58,13 +71,6 @@ done < <(find "$DEST" -maxdepth 1 -type f -iname "*.heic" -print0)
 
 echo "▶ Removing source HEIC files"
 find "$DEST" -maxdepth 1 -type f -iname "*.heic" -delete
-
-# === ADB TRANSFER ===
-echo "▶ Connecting to Android tablet via ADB (Wi-Fi)"
-if ! adb connect "${ANDROID_IP}:${ANDROID_PORT}" >/dev/null; then
-  echo "❌ ADB connect failed. Check Wireless debugging on tablet."
-  exit 1
-fi
 
 shopt -s nullglob
 files=( "$DEST"/*.jpg "$DEST"/*.jpeg )

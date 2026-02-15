@@ -20,16 +20,17 @@ source "$CONFIG_FILE"
 
 DEST="$DIGITAL_FRAME_DIR"
 ALBUM="$DIGITAL_FRAME_ALBUM"
+ADB_TARGET="${ANDROID_IP}:${ANDROID_PORT}"
 
 echo "▶ Preflight: checking ADB connection"
-if ! adb connect "${ANDROID_IP}:${ANDROID_PORT}" >/dev/null 2>&1; then
-  echo "❌ ADB connect failed for ${ANDROID_IP}:${ANDROID_PORT}."
+if ! adb connect "$ADB_TARGET" >/dev/null 2>&1; then
+  echo "❌ ADB connect failed for $ADB_TARGET."
   echo "   Fix Wireless debugging on the tablet, then re-run."
   exit 1
 fi
 
-if ! adb -s "${ANDROID_IP}:${ANDROID_PORT}" get-state >/dev/null 2>&1; then
-  echo "❌ ADB device is not ready (${ANDROID_IP}:${ANDROID_PORT})."
+if ! adb -s "$ADB_TARGET" get-state >/dev/null 2>&1; then
+  echo "❌ ADB device is not ready ($ADB_TARGET)."
   echo "   Fix the connection first, then re-run."
   exit 1
 fi
@@ -85,18 +86,18 @@ for f in "${files[@]}"; do
 done
 
 echo "▶ Sending photos to tablet"
-adb push "${files[@]}" "${ANDROID_DEST}/"
+adb -s "$ADB_TARGET" push "${files[@]}" "${ANDROID_DEST}/"
 
 echo "▶ Triggering MediaStore scan"
-adb shell content call \
+adb -s "$ADB_TARGET" shell content call \
   --method scan_volume \
   --uri content://media \
   --arg external_primary \
   >/dev/null 2>&1 || true
 
 echo "▶ Restarting Fotoo"
-adb shell am force-stop "$FOTOO_PKG" >/dev/null 2>&1 || true
-adb shell monkey -p "$FOTOO_PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
+adb -s "$ADB_TARGET" shell am force-stop "$FOTOO_PKG" >/dev/null 2>&1 || true
+adb -s "$ADB_TARGET" shell monkey -p "$FOTOO_PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
 
 echo "▶ Cleaning local DigitalFrame folder (JPG only)"
 rm -f "$DEST"/*.jpg "$DEST"/*.jpeg 2>/dev/null || true

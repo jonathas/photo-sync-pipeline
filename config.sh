@@ -21,8 +21,8 @@ LOWERCASE_SCRIPT="$SCRIPT_DIR/helpers/lowercase-extensions"
 CLEAR_ALBUM_SCRIPT="$SCRIPT_DIR/helpers/clear-digital-frame-album.applescript"
 
 # === BACKUPS ===
-SYNC_EXTERNAL_CMD="$SCRIPT_DIR/bin/sync-external-drive"
-SYNC_BACKUP_CMD="$SCRIPT_DIR/bin/sync-backup-drives"
+SYNC_EXTERNAL_CMD="sync-external-drive"
+SYNC_BACKUP_CMD="sync-backup-drives"
 
 # === SYNC PATHS ===
 SYNC_BASE_DIR="$HOME/Library/CloudStorage/Dropbox"

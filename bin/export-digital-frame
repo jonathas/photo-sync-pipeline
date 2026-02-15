@@ -22,6 +22,23 @@ DEST="$DIGITAL_FRAME_DIR"
 ALBUM="$DIGITAL_FRAME_ALBUM"
 ADB_TARGET="${ANDROID_IP}:${ANDROID_PORT}"
 
+resolve_cmd() {
+  local configured="$1"
+  local cmd_name="${configured##*/}"
+
+  if command -v "$cmd_name" >/dev/null 2>&1; then
+    command -v "$cmd_name"
+    return 0
+  fi
+
+  if [[ "$configured" == */* && -x "$configured" ]]; then
+    printf "%s\n" "$configured"
+    return 0
+  fi
+
+  return 1
+}
+
 echo "▶ Preflight: checking ADB connection"
 if ! adb connect "$ADB_TARGET" >/dev/null 2>&1; then
   echo "❌ ADB connect failed for $ADB_TARGET."
@@ -110,6 +127,18 @@ if ! osascript "$CLEAR_ALBUM_SCRIPT" "$DIGITAL_FRAME_ALBUM"; then
 fi
 
 echo "▶ Running backups"
-"$SYNC_EXTERNAL_CMD" && "$SYNC_BACKUP_CMD"
+if ! sync_external_cmd="$(resolve_cmd "${SYNC_EXTERNAL_CMD:-sync-external-drive}")"; then
+  echo "❌ Backup command not found: ${SYNC_EXTERNAL_CMD:-sync-external-drive}"
+  echo "   Install/put sync-external-drive on PATH or fix SYNC_EXTERNAL_CMD."
+  exit 1
+fi
+
+if ! sync_backup_cmd="$(resolve_cmd "${SYNC_BACKUP_CMD:-sync-backup-drives}")"; then
+  echo "❌ Backup command not found: ${SYNC_BACKUP_CMD:-sync-backup-drives}"
+  echo "   Install/put sync-backup-drives on PATH or fix SYNC_BACKUP_CMD."
+  exit 1
+fi
+
+"$sync_external_cmd" && "$sync_backup_cmd"
 
 echo "✅ export-digital-frame complete"
